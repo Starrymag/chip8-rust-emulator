@@ -1,3 +1,5 @@
+mod beep;
+
 use chip8_core::*;
 use std::env;
 use sdl2::event::Event;
@@ -8,6 +10,7 @@ use sdl2::video::Window;
 use sdl2::keyboard::Keycode;
 use std::fs::File;
 use std::io::Read;
+use beep::Beep;
 
 const SCALE: u32 = 20;
 const WINDOW_WIDTH: u32 = (SCREEN_WIDTH as u32) * SCALE;
@@ -77,6 +80,8 @@ fn main() {
     let mut event_pump = sdl_context.event_pump().unwrap();
     let mut chip8 = Cpu::new();
 
+    let beeper = Beep::new(&sdl_context);
+
     let mut rom = File::open(&args[1]).expect("Unable to open file");
     let mut buffer = Vec::new();
 
@@ -102,7 +107,15 @@ fn main() {
         for _ in 0..TICKS_PER_FRAME {
             chip8.tick();
         }
+
         chip8.tick_timers();
+
+        if chip8.get_beep_status() {
+            beeper.play();
+        } else {
+            beeper.pause();
+        }
+
         draw_screen(&chip8, &mut canvas);
     }
 }

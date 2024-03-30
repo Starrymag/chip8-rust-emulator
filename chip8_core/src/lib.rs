@@ -40,6 +40,7 @@ pub struct Cpu {
     keys: [bool; NUM_KEYS],
     dt: u8,
     st: u8,
+    need_beep: bool,
 }
 
 impl Cpu {
@@ -55,6 +56,7 @@ impl Cpu {
             keys: [false; NUM_KEYS],
             dt: 0,
             st: 0,
+            need_beep: false,
         };
         new_cpu.ram[..FONTSET_SIZE].copy_from_slice(&FONTSET);
         new_cpu
@@ -98,11 +100,15 @@ impl Cpu {
         }
 
         if self.st > 0 {
-            if self.st == 1 {
-                // BEEP
-            }
             self.st -= 1;
+            self.need_beep = true;
+        } else {
+            self.need_beep = false;
         }
+    }
+
+    pub fn get_beep_status(&self) -> bool {
+        self.need_beep
     }
 
     pub fn get_display(&self) -> &[bool]{
